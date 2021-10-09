@@ -1,154 +1,88 @@
-
 import os
-import numpy as np
-import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras.utils import to_categorical
-import random
-
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+os.environ['TF_CUDNN_DETERMINISTIC'] = '1'
+from Model import *
+from NeuralNets import *
+from Dataset import *
+from Config import *
+print("GPUs Available: ", tf.config.list_physical_devices('GPU'))
 
 random.seed(1618)
 np.random.seed(1618)
-#tf.set_random_seed(1618)   # Uncomment for TF1.
 tf.random.set_seed(1618)
 
-#tf.logging.set_verbosity(tf.logging.ERROR)   # Uncomment for TF1.
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+# ALGORITHM = "guesser"
+ALGORITHM = "tf_net"
+# ALGORITHM = "tf_conv"
+# ALGORITHM = "vgg16"
+# ALGORITHM = "resnet50"
+# ALGORITHM = "efnetb0"
 
-ALGORITHM = "guesser"
-#ALGORITHM = "tf_net"
-#ALGORITHM = "tf_conv"
+# DATASET = "mnist_d"
+# DATASET = "mnist_f"
+# DATASET = "cifar_10"
+DATASET = "cifar_100_c"
+# DATASET = "cifar_100_f"
+dataset = Dataset()
 
-DATASET = "mnist_d"
-#DATASET = "mnist_f"
-#DATASET = "cifar_10"
-#DATASET = "cifar_100_f"
-#DATASET = "cifar_100_c"
-
-if DATASET == "mnist_d":
-    NUM_CLASSES = 10
-    IH = 28
-    IW = 28
-    IZ = 1
-    IS = 784
-elif DATASET == "mnist_f":
-    NUM_CLASSES = 10
-    IH = 28
-    IW = 28
-    IZ = 1
-    IS = 784
-elif DATASET == "cifar_10":
-    pass                                 # TODO: Add this case.
-elif DATASET == "cifar_100_f":
-    pass                                 # TODO: Add this case.
-elif DATASET == "cifar_100_c":
-    pass                                 # TODO: Add this case.
+config = DEFAULT_CONFIG
 
 
-#=========================<Classifier Functions>================================
+def set_dataset(ds=None):
+    global DATASET
+    global dataset
+    global config
 
-def guesserClassifier(xTest):
-    ans = []
-    for entry in xTest:
-        pred = [0] * NUM_CLASSES
-        pred[random.randint(0, 9)] = 1
-        ans.append(pred)
-    return np.array(ans)
+    if ds is None:
+        ds = DATASET
+    if ds == "mnist_d":
+        dataset = DigitMNIST()
+    elif ds == "mnist_f":
+        dataset = FashionMNIST()
+    elif ds == "cifar_10":
+        dataset = CIFAR10()
+    elif ds == "cifar_100_f":
+        dataset = CIFAR100F()
+        config = cifar100f_config()
+    elif ds == "cifar_100_c":
+        dataset = CIFAR100C()
 
-
-def buildTFNeuralNet(x, y, eps = 6):
-    pass        #TODO: Implement a standard ANN here.
-    return None
-
-
-def buildTFConvNet(x, y, eps = 10, dropout = True, dropRate = 0.2):
-    pass        #TODO: Implement a CNN here. dropout option is required.
-    return None
-
-#=========================<Pipeline Functions>==================================
-
-def getRawData():
-    if DATASET == "mnist_d":
-        mnist = tf.keras.datasets.mnist
-        (xTrain, yTrain), (xTest, yTest) = mnist.load_data()
-    elif DATASET == "mnist_f":
-        mnist = tf.keras.datasets.fashion_mnist
-        (xTrain, yTrain), (xTest, yTest) = mnist.load_data()
-    elif DATASET == "cifar_10":
-        pass      # TODO: Add this case.
-    elif DATASET == "cifar_100_f":
-        pass      # TODO: Add this case.
-    elif DATASET == "cifar_100_c":
-        pass      # TODO: Add this case.
-    else:
-        raise ValueError("Dataset not recognized.")
-    print("Dataset: %s" % DATASET)
-    print("Shape of xTrain dataset: %s." % str(xTrain.shape))
-    print("Shape of yTrain dataset: %s." % str(yTrain.shape))
-    print("Shape of xTest dataset: %s." % str(xTest.shape))
-    print("Shape of yTest dataset: %s." % str(yTest.shape))
-    return ((xTrain, yTrain), (xTest, yTest))
+    print(f'Dataset: {ds}')
+    return ds
 
 
-
-def preprocessData(raw):
-    ((xTrain, yTrain), (xTest, yTest)) = raw
-    if ALGORITHM != "tf_conv":
-        xTrainP = xTrain.reshape((xTrain.shape[0], IS))
-        xTestP = xTest.reshape((xTest.shape[0], IS))
-    else:
-        xTrainP = xTrain.reshape((xTrain.shape[0], IH, IW, IZ))
-        xTestP = xTest.reshape((xTest.shape[0], IH, IW, IZ))
-    yTrainP = to_categorical(yTrain, NUM_CLASSES)
-    yTestP = to_categorical(yTest, NUM_CLASSES)
-    print("New shape of xTrain dataset: %s." % str(xTrainP.shape))
-    print("New shape of xTest dataset: %s." % str(xTestP.shape))
-    print("New shape of yTrain dataset: %s." % str(yTrainP.shape))
-    print("New shape of yTest dataset: %s." % str(yTestP.shape))
-    return ((xTrainP, yTrainP), (xTestP, yTestP))
+# =========================<Pipeline Functions>==================================
 
 
-
-def trainModel(data):
-    xTrain, yTrain = data
+def train_model(dataset: Dataset):
+    x_train, y_train = dataset.get_training_data()
     if ALGORITHM == "guesser":
-        return None   # Guesser has no model, as it is just guessing.
+        print("Building and training Guesser.")
+        return GuesserModel(dataset.flatten_shape, dataset.num_classes).train(x_train)
     elif ALGORITHM == "tf_net":
         print("Building and training TF_NN.")
-        return buildTFNeuralNet(xTrain, yTrain)
+        return ANNModel(dataset.flatten_shape, dataset.num_classes, config).train(x_train, y_train)
     elif ALGORITHM == "tf_conv":
         print("Building and training TF_CNN.")
-        return buildTFConvNet(xTrain, yTrain)
+        return CNNModel(dataset.input_shape, dataset.num_classes, config).train(x_train, y_train)
+    elif ALGORITHM == "vgg16":
+        print("Building and training VGG16.")
+        return VGG(dataset.input_shape, dataset.num_classes, config).train(x_train, y_train)
+    elif ALGORITHM == "resnet50":
+        print("Building and training ResNet50.")
+        return ResNet(dataset.input_shape, dataset.num_classes, config).train(x_train, y_train)
+    elif ALGORITHM == "efnetb0":
+        print("Building and training EfficientNetB0.")
+        return EfficientNet(dataset.input_shape, dataset.num_classes, config).train(x_train, y_train)
     else:
         raise ValueError("Algorithm not recognized.")
 
 
-
-def runModel(data, model):
-    if ALGORITHM == "guesser":
-        return guesserClassifier(data)
-    elif ALGORITHM == "tf_net":
-        print("Testing TF_NN.")
-        preds = model.predict(data)
-        for i in range(preds.shape[0]):
-            oneHot = [0] * NUM_CLASSES
-            oneHot[np.argmax(preds[i])] = 1
-            preds[i] = oneHot
-        return preds
-    elif ALGORITHM == "tf_conv":
-        print("Testing TF_CNN.")
-        preds = model.predict(data)
-        for i in range(preds.shape[0]):
-            oneHot = [0] * NUM_CLASSES
-            oneHot[np.argmax(preds[i])] = 1
-            preds[i] = oneHot
-        return preds
-    else:
-        raise ValueError("Algorithm not recognized.")
+def run_model(data, model):
+    return model.predict(data)
 
 
-
-def evalResults(data, preds):
+def eval_results(data, preds):
     xTest, yTest = data
     acc = 0
     for i in range(preds.shape[0]):
@@ -157,19 +91,24 @@ def evalResults(data, preds):
     print("Classifier algorithm: %s" % ALGORITHM)
     print("Classifier accuracy: %f%%" % (accuracy * 100))
     print()
+    return accuracy
 
 
+# =========================<Main>================================================
 
-#=========================<Main>================================================
 
 def main():
-    raw = getRawData()
-    data = preprocessData(raw)
-    model = trainModel(data[0])
-    preds = runModel(data[1][0], model)
-    evalResults(data[1], preds)
+    ds = set_dataset()
+    model = train_model(dataset)
+    preds = run_model(dataset.get_test_data()[0], model)
+    acc = eval_results(dataset.get_test_data(), preds)
+    log(ALGORITHM, ds, acc, config)
 
+
+def test():
+    p = Plotter.from_log()
+    p.bar('Combine_Accuracy_Plot', save='Combine_Accuracy_Plot.pdf')
 
 
 if __name__ == '__main__':
-    main()
+    test()
