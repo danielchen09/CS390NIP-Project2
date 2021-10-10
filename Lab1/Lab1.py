@@ -7,22 +7,20 @@ from Dataset import *
 from Config import *
 print("GPUs Available: ", tf.config.list_physical_devices('GPU'))
 
-random.seed(1618)
-np.random.seed(1618)
-tf.random.set_seed(1618)
+# random.seed(1618)
+# np.random.seed(1618)
+# tf.random.set_seed(1618)
 
 # ALGORITHM = "guesser"
-ALGORITHM = "tf_net"
-# ALGORITHM = "tf_conv"
-# ALGORITHM = "vgg16"
-# ALGORITHM = "resnet50"
+# ALGORITHM = "tf_net"
+ALGORITHM = "tf_conv"
 # ALGORITHM = "efnetb0"
 
 # DATASET = "mnist_d"
 # DATASET = "mnist_f"
 # DATASET = "cifar_10"
-DATASET = "cifar_100_c"
-# DATASET = "cifar_100_f"
+# DATASET = "cifar_100_c"
+DATASET = "cifar_100_f"
 dataset = Dataset()
 
 config = DEFAULT_CONFIG
@@ -65,12 +63,6 @@ def train_model(dataset: Dataset):
     elif ALGORITHM == "tf_conv":
         print("Building and training TF_CNN.")
         return CNNModel(dataset.input_shape, dataset.num_classes, config).train(x_train, y_train)
-    elif ALGORITHM == "vgg16":
-        print("Building and training VGG16.")
-        return VGG(dataset.input_shape, dataset.num_classes, config).train(x_train, y_train)
-    elif ALGORITHM == "resnet50":
-        print("Building and training ResNet50.")
-        return ResNet(dataset.input_shape, dataset.num_classes, config).train(x_train, y_train)
     elif ALGORITHM == "efnetb0":
         print("Building and training EfficientNetB0.")
         return EfficientNet(dataset.input_shape, dataset.num_classes, config).train(x_train, y_train)
@@ -111,4 +103,4 @@ def test():
 
 
 if __name__ == '__main__':
-    test()
+    main()

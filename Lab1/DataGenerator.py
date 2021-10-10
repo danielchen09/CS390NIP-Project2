@@ -1,14 +1,15 @@
 import tensorflow as tf
 import numpy as np
 import albumentations as albu
+import cv2
 
 
 def resize_img(img, shape):
-    return tf.image.resize(img, shape)
+    return cv2.resize(img, (shape[1], shape[0]), interpolation=cv2.INTER_CUBIC)
 
 
 class DataGenerator(tf.keras.utils.Sequence):
-    def __init__(self, images, labels=None, mode='fit', batch_size=8, dim=(224, 224), channels=3,
+    def __init__(self, images, labels=None, mode='fit', batch_size=5, dim=(224, 224), channels=3,
                  n_classes=100, shuffle=True, augment=False):
 
         # initializing the configuration of the generator
@@ -45,7 +46,7 @@ class DataGenerator(tf.keras.utils.Sequence):
             # generate pre-processed image
             img = self.images[ID]
             # image rescaling
-            img = img.astype(np.float32) / 255.
+            # img = img.astype(np.float32) / 255.
             # resizing as per new dimensions
             img = resize_img(img, self.dim)
             X[i] = img

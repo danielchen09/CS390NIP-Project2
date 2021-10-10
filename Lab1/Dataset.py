@@ -8,8 +8,6 @@ class Dataset:
         self.num_classes = 0
         self.input_shape = np.array([0])
         self.flatten_shape = 0
-        self.train_size = 0
-        self.test_size = 0
 
     def _get_data(self, dataset):
         (x_train, y_train), (x_test, y_test) = dataset
@@ -19,8 +17,6 @@ class Dataset:
         x_test = x_test / 255
         y_train = to_categorical(y_train, self.num_classes)
         y_test = to_categorical(y_test, self.num_classes)
-        self.train_size = x_train.shape[0]
-        self.test_size = x_test.shape[0]
         return (x_train, y_train), (x_test, y_test)
 
     def get_data(self):

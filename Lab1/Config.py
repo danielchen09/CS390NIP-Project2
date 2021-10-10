@@ -1,5 +1,5 @@
 DEFAULT_CONFIG = {
-    'epochs': 100,
+    'epochs': 15,
     'batch_size': 32,
     'augment': False,
     '64_layers': 1,
@@ -12,7 +12,8 @@ DEFAULT_CONFIG = {
     'regularization': 'l2',
     'lambda': 0.01,
     'linear_layers': [512],
-    'auto_lr': False
+    'auto_lr': False,
+    'save': True
 }
 
 
@@ -29,7 +30,7 @@ def edit_default_config(conf):
 
 def cifar100f_config():
     conf = {
-        'epochs': 100,
+        'epochs': 15,
         'augment': True,
         '64_layers': 2,
         '128_layers': 2,
