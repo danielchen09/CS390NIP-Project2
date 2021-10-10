@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split, StratifiedShuffleSplit
 from tensorflow.keras.callbacks import ReduceLROnPlateau
 from tensorflow.keras.layers.experimental import preprocessing
 from DataGenerator import *
-import efficientnet
+import os
 
 
 datagen = tf.keras.preprocessing.image.ImageDataGenerator(
@@ -99,6 +99,8 @@ class CNNModel(Model):
         self.model.compile(optimizer=tf.keras.optimizers.Adam(),
                            loss=tf.keras.losses.CategoricalCrossentropy(),
                            metrics=['accuracy'])
+        if os.path.exists('CheckPoints/cnn_weight.ckpt'):
+            self.model.load_weights('CheckPoints/cnn_weight.ckpt')
 
     def train(self, x_train, y_train) -> Model:
         x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=0.2, random_state=1618)
@@ -106,7 +108,7 @@ class CNNModel(Model):
         if self.config['auto_lr']:
             callback += [ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=3, min_lr=0.0001)]
         if self.config['save']:
-            callback += [tf.keras.callbacks.ModelCheckpoint(filepath='CheckPoints/efnetb0.ckpt',
+            callback += [tf.keras.callbacks.ModelCheckpoint(filepath='CheckPoints/cnn_weight.ckpt',
                                                             save_weights_only=True,
                                                             verbose=1)]
         if self.config['augment']:
@@ -121,7 +123,6 @@ class CNNModel(Model):
                            batch_size=self.config['batch_size'],
                            callbacks=callback,
                            validation_data=(x_val, y_val))
-        self.model.save_weights('cnn_weight')
         return self
 
     def predict(self, x):
@@ -147,6 +148,8 @@ class EfficientNet(Model):
         self.model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.0001),
                            loss=tf.keras.losses.CategoricalCrossentropy(),
                            metrics=['accuracy'])
+        if os.path.exists('CheckPoints/efnetb0.ckpt'):
+            self.model.load_weights('CheckPoints/efnetb0.ckpt')
 
     def train(self, _x_train, _y_train):
         sss = StratifiedShuffleSplit(n_splits=2, test_size=0.2, random_state=123)
