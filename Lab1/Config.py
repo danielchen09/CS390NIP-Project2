@@ -30,7 +30,7 @@ def edit_default_config(conf):
 
 def cifar100f_config():
     conf = {
-        'epochs': 15,
+        'epochs': 25,
         'augment': True,
         '64_layers': 2,
         '128_layers': 2,

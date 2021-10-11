@@ -148,8 +148,7 @@ class EfficientNet(Model):
         self.model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.0001),
                            loss=tf.keras.losses.CategoricalCrossentropy(),
                            metrics=['accuracy'])
-        if os.path.exists('CheckPoints/efnetb0.ckpt'):
-            self.model.load_weights('CheckPoints/efnetb0.ckpt')
+        self.model.load_weights('CheckPoints/efnetb0.ckpt')
 
     def train(self, _x_train, _y_train):
         sss = StratifiedShuffleSplit(n_splits=2, test_size=0.2, random_state=123)
@@ -158,11 +157,6 @@ class EfficientNet(Model):
             x_train, x_val = _x_train[train_index], _x_train[val_index]
             y_train, y_val = _y_train[train_index], _y_train[val_index]
 
-        print('-')
-        print(f'x train shape: {x_train.shape}')
-        print(f'x val shape: {x_val.shape}')
-        print(x_train[0])
-        print(x_val[0])
         train_generator = DataGenerator(x_train, y_train, augment=True)
         val_generator = DataGenerator(x_val, y_val, augment=False)
         early_stopping = tf.keras.callbacks.EarlyStopping(
@@ -187,6 +181,7 @@ class EfficientNet(Model):
                        verbose=1,
                        epochs=self.config['epochs'])
         self.model.save_weights('efnetb0_weight')
+        return self
 
     def predict(self, x):
         return to_one_hot(self.model.predict(DataGenerator(x, mode='predict', augment=False, shuffle=False)),

@@ -13,8 +13,8 @@ print("GPUs Available: ", tf.config.list_physical_devices('GPU'))
 
 # ALGORITHM = "guesser"
 # ALGORITHM = "tf_net"
-ALGORITHM = "tf_conv"
-# ALGORITHM = "efnetb0"
+# ALGORITHM = "tf_conv"
+ALGORITHM = "efnetb0"
 
 # DATASET = "mnist_d"
 # DATASET = "mnist_f"
@@ -98,8 +98,10 @@ def main():
 
 
 def test():
-    p = Plotter.from_log()
-    p.bar('Combine_Accuracy_Plot', save='Combine_Accuracy_Plot.pdf')
+    ds = set_dataset()
+    model = EfficientNet(dataset.input_shape, dataset.num_classes, DEFAULT_CONFIG)
+
+    acc = eval_results(dataset.get_test_data(), run_model(dataset.get_training_data()[0], model))
 
 
 if __name__ == '__main__':
