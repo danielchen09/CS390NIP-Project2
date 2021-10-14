@@ -99,7 +99,7 @@ class CNNModel(Model):
         self.model.compile(optimizer=tf.keras.optimizers.Adam(),
                            loss=tf.keras.losses.CategoricalCrossentropy(),
                            metrics=['accuracy'])
-        if os.path.exists('CheckPoints/cnn_weight.ckpt'):
+        if self.config['load']:
             self.model.load_weights('CheckPoints/cnn_weight.ckpt')
 
     def train(self, x_train, y_train) -> Model:
@@ -148,7 +148,8 @@ class EfficientNet(Model):
         self.model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.0001),
                            loss=tf.keras.losses.CategoricalCrossentropy(),
                            metrics=['accuracy'])
-        self.model.load_weights('CheckPoints/efnetb0.ckpt')
+        if self.config['load']:
+            self.model.load_weights('CheckPoints/efnetb0.ckpt')
 
     def train(self, _x_train, _y_train):
         sss = StratifiedShuffleSplit(n_splits=2, test_size=0.2, random_state=123)

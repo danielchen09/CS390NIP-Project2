@@ -98,11 +98,9 @@ def main():
 
 
 def test():
-    ds = set_dataset()
-    model = EfficientNet(dataset.input_shape, dataset.num_classes, DEFAULT_CONFIG)
-
-    acc = eval_results(dataset.get_test_data(), run_model(dataset.get_training_data()[0], model))
+    p = Plotter.from_log()
+    p.bar('Combine_Accuracy_Plot', save='Combine_Accuracy_Plot.pdf')
 
 
 if __name__ == '__main__':
-    main()
+    test()

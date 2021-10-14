@@ -13,7 +13,8 @@ DEFAULT_CONFIG = {
     'lambda': 0.01,
     'linear_layers': [512],
     'auto_lr': False,
-    'save': True
+    'save': True,
+    'load': True
 }
 
 

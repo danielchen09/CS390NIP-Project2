@@ -1,0 +1,2 @@
+model_checkpoint_path: "efnetb0_weight"
+all_model_checkpoint_paths: "efnetb0_weight"
